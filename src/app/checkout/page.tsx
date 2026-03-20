@@ -48,7 +48,7 @@ export default function CheckoutPage() {
 
       const data = await res.json()
 
-      if (form.paymentMethod === 'stripe' && data.checkoutUrl) {
+      if ((form.paymentMethod === 'stripe' || form.paymentMethod === 'twint') && data.checkoutUrl) {
         window.location.href = data.checkoutUrl
         return
       }
@@ -145,23 +145,23 @@ export default function CheckoutPage() {
               <input
                 type="radio"
                 name="payment"
+                value="stripe"
+                checked={form.paymentMethod === 'stripe'}
+                onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
+                className="text-baby-rose"
+              />
+              <span>Carte bancaire (Visa, Mastercard)</span>
+            </label>
+            <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
+              <input
+                type="radio"
+                name="payment"
                 value="cash"
                 checked={form.paymentMethod === 'cash'}
                 onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                 className="text-baby-rose"
               />
               <span>Espèces (au retrait)</span>
-            </label>
-            <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
-              <input
-                type="radio"
-                name="payment"
-                value="stripe"
-                checked={form.paymentMethod === 'stripe'}
-                onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-                className="text-baby-rose"
-              />
-              <span>Carte bancaire (Stripe)</span>
             </label>
           </div>
         </div>

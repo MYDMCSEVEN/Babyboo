@@ -1,14 +1,11 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { getFeaturedProducts } from '@/lib/products'
 import ProductCard from '@/components/ProductCard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const featuredProducts = await prisma.product.findMany({
-    where: { featured: true, inStock: true },
-    take: 4,
-  })
+  const featuredProducts = getFeaturedProducts().slice(0, 4)
 
   return (
     <div>

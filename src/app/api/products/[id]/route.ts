@@ -1,34 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getProductById } from '@/lib/products'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const data = await req.json()
-  const product = await prisma.product.update({
-    where: { id: params.id },
-    data: {
-      name: data.name,
-      description: data.description,
-      price: parseFloat(data.price),
-      image: data.image,
-      images: data.images,
-      category: data.category,
-      inStock: data.inStock,
-      featured: data.featured,
-    },
-  })
-
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const product = getProductById(params.id)
+  if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(product)
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+export async function PUT() {
+  return NextResponse.json({ error: 'Modification des produits non disponible en mode statique. Modifiez src/lib/products.ts directement.' }, { status: 501 })
+}
 
-  await prisma.product.delete({ where: { id: params.id } })
-  return NextResponse.json({ success: true })
+export async function DELETE() {
+  return NextResponse.json({ error: 'Suppression non disponible en mode statique.' }, { status: 501 })
 }

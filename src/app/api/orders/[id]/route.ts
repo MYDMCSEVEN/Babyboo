@@ -1,17 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { NextResponse } from 'next/server'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const data = await req.json()
-  const order = await prisma.order.update({
-    where: { id: params.id },
-    data: { status: data.status },
-  })
-
-  return NextResponse.json(order)
+export async function PUT() {
+  return NextResponse.json({ message: 'Orders are managed externally' })
 }

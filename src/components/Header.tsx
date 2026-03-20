@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { getCart } from '@/lib/cart'
 
@@ -27,7 +28,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl">🧸</span>
+            <Image src="/images/logo.png" alt="Babyboo Création" width={40} height={40} className="rounded-full" />
             <span className="font-serif text-xl text-baby-text font-bold">Babyboo Création</span>
           </Link>
 

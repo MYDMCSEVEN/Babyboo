@@ -1,13 +1,10 @@
-import { prisma } from '@/lib/prisma'
+import { getProducts } from '@/lib/products'
 import ProductCard from '@/components/ProductCard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function BoutiquePage() {
-  const products = await prisma.product.findMany({
-    where: { inStock: true },
-    orderBy: { createdAt: 'desc' },
-  })
+  const products = getProducts()
 
   const categories = [...new Set(products.map((p) => p.category))]
 

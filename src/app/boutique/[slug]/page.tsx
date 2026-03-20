@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getProductBySlug } from '@/lib/products'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import AddToCartButton from './AddToCartButton'
@@ -7,9 +7,7 @@ import { formatPrice } from '@/lib/format'
 export const dynamic = 'force-dynamic'
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-  })
+  const product = getProductBySlug(params.slug)
 
   if (!product) notFound()
 

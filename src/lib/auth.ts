@@ -1,7 +1,5 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from './prisma'
-import { compareSync } from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -14,15 +12,14 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
-        const admin = await prisma.admin.findUnique({
-          where: { email: credentials.email },
-        })
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@babyboo.ch'
+        const adminPassword = process.env.ADMIN_PASSWORD || 'changeme'
 
-        if (!admin || !compareSync(credentials.password, admin.password)) {
-          return null
+        if (credentials.email === adminEmail && credentials.password === adminPassword) {
+          return { id: '1', email: adminEmail }
         }
 
-        return { id: admin.id, email: admin.email }
+        return null
       },
     }),
   ],

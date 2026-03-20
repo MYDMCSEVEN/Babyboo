@@ -32,7 +32,7 @@ export default function Footer() {
               <span>@babyboo.creationss</span>
             </a>
             <div className="mt-4 text-sm text-baby-text/70">
-              <p>Email: contact@babyboo.ch</p>
+              <p>Email: info@babyboo-creations.ch</p>
               <p>Tél: 079 270 41 01</p>
             </div>
           </div>

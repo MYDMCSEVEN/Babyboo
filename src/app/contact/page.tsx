@@ -26,8 +26,8 @@ export default function ContactPage() {
               <span className="text-xl">📧</span>
               <div>
                 <p className="font-semibold">Email</p>
-                <a href="mailto:contact@babyboo.ch" className="text-baby-rose hover:underline">
-                  contact@babyboo.ch
+                <a href="mailto:info@babyboo-creations.ch" className="text-baby-rose hover:underline">
+                  info@babyboo-creations.ch
                 </a>
               </div>
             </div>

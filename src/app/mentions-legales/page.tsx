@@ -8,7 +8,7 @@ export default function MentionsLegalesPage() {
           <h2 className="font-serif text-xl text-baby-text mb-3">Entreprise</h2>
           <p>Babyboo Création</p>
           <p>Suisse</p>
-          <p>Email : contact@babyboo.ch</p>
+          <p>Email : info@babyboo-creations.ch</p>
           <p>Tél : 079 270 41 01</p>
         </section>
 

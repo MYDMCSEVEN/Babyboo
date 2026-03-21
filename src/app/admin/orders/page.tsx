@@ -6,30 +6,35 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
 interface OrderItem {
-  id: string
+  name: string
   quantity: number
   price: number
-  product: { name: string }
 }
 
 interface Order {
   id: string
+  orderId: string
   customerName: string
   customerEmail: string
   customerPhone: string
-  status: string
-  total: number
   paymentMethod: string
+  address: string | null
+  personalization: string | null
+  subtotal: number
+  shipping: number
+  total: number
+  status: string
   items: OrderItem[]
   createdAt: string
+  user?: { name: string; email: string } | null
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700' },
-  confirmed: { label: 'Confirmée', color: 'bg-blue-100 text-blue-700' },
-  ready: { label: 'Prête', color: 'bg-purple-100 text-purple-700' },
-  delivered: { label: 'Livrée', color: 'bg-green-100 text-green-700' },
-  cancelled: { label: 'Annulée', color: 'bg-red-100 text-red-700' },
+  PENDING: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700' },
+  PAID: { label: 'Payée', color: 'bg-blue-100 text-blue-700' },
+  SHIPPED: { label: 'Expédiée', color: 'bg-purple-100 text-purple-700' },
+  DELIVERED: { label: 'Livrée', color: 'bg-green-100 text-green-700' },
+  CANCELLED: { label: 'Annulée', color: 'bg-red-100 text-red-700' },
 }
 
 export default function AdminOrdersPage() {
@@ -37,12 +42,16 @@ export default function AdminOrdersPage() {
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null)
+  const [filterStatus, setFilterStatus] = useState<string>('')
 
   const fetchOrders = useCallback(async () => {
-    const res = await fetch('/api/orders')
-    const data = await res.json()
-    setOrders(data)
-  }, [])
+    const url = filterStatus ? `/api/orders?status=${filterStatus}` : '/api/orders'
+    const res = await fetch(url)
+    if (res.ok) {
+      const data = await res.json()
+      setOrders(data)
+    }
+  }, [filterStatus])
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/admin')
@@ -51,7 +60,7 @@ export default function AdminOrdersPage() {
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     await fetch(`/api/orders/${orderId}`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     })
@@ -67,10 +76,10 @@ export default function AdminOrdersPage() {
   }
 
   const totalRevenue = orders
-    .filter((o) => o.status !== 'cancelled')
+    .filter((o) => o.status !== 'CANCELLED')
     .reduce((sum, o) => sum + o.total, 0)
 
-  const pendingOrders = orders.filter((o) => o.status === 'pending').length
+  const pendingOrders = orders.filter((o) => o.status === 'PENDING').length
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,7 +87,7 @@ export default function AdminOrdersPage() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-6">
-            <h1 className="font-serif text-xl text-baby-text font-bold">🧸 Admin Babyboo</h1>
+            <h1 className="font-serif text-xl text-baby-text font-bold">Admin Babyboo</h1>
             <nav className="flex space-x-4">
               <Link href="/admin/products" className="text-baby-text/60 hover:text-baby-text">
                 Produits
@@ -119,7 +128,22 @@ export default function AdminOrdersPage() {
           </div>
         </div>
 
-        <h2 className="text-2xl font-serif text-baby-text mb-6">Commandes</h2>
+        {/* Filter + title */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-serif text-baby-text">Commandes</h2>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+          >
+            <option value="">Tous les statuts</option>
+            <option value="PENDING">En attente</option>
+            <option value="PAID">Payée</option>
+            <option value="SHIPPED">Expédiée</option>
+            <option value="DELIVERED">Livrée</option>
+            <option value="CANCELLED">Annulée</option>
+          </select>
+        </div>
 
         {orders.length === 0 ? (
           <div className="bg-white rounded-xl p-12 text-center shadow-sm">
@@ -128,7 +152,7 @@ export default function AdminOrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => {
-              const statusInfo = statusLabels[order.status] || statusLabels.pending
+              const statusInfo = statusLabels[order.status] || statusLabels.PENDING
               const isExpanded = expandedOrder === order.id
 
               return (
@@ -139,7 +163,7 @@ export default function AdminOrdersPage() {
                   >
                     <div className="flex items-center space-x-6">
                       <div>
-                        <p className="font-semibold text-baby-text">#{order.id.slice(-6)}</p>
+                        <p className="font-semibold text-baby-text">{order.orderId}</p>
                         <p className="text-sm text-gray-500">
                           {new Date(order.createdAt).toLocaleDateString('fr-CH')}
                         </p>
@@ -154,7 +178,7 @@ export default function AdminOrdersPage() {
                         {statusInfo.label}
                       </span>
                       <p className="font-bold">{order.total.toFixed(2)} CHF</p>
-                      <span className="text-gray-400">{isExpanded ? '▲' : '▼'}</span>
+                      <span className="text-gray-400">{isExpanded ? '\u25B2' : '\u25BC'}</span>
                     </div>
                   </div>
 
@@ -166,18 +190,41 @@ export default function AdminOrdersPage() {
                           <p>{order.customerName}</p>
                           <p className="text-sm text-gray-600">{order.customerEmail}</p>
                           <p className="text-sm text-gray-600">{order.customerPhone}</p>
+                          {order.user && (
+                            <p className="text-xs text-blue-600 mt-1">Compte client</p>
+                          )}
                           <p className="text-sm text-gray-600 mt-2">
                             Paiement : <span className="capitalize">{order.paymentMethod}</span>
                           </p>
+                          {order.address && (
+                            <div className="mt-2">
+                              <p className="text-sm font-medium">Adresse :</p>
+                              <p className="text-sm text-gray-600">{order.address}</p>
+                            </div>
+                          )}
+                          {order.personalization && (
+                            <div className="mt-2">
+                              <p className="text-sm font-medium">Personnalisation :</p>
+                              <p className="text-sm text-gray-600 whitespace-pre-line">{order.personalization}</p>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <h4 className="font-semibold mb-2">Articles</h4>
-                          {order.items.map((item) => (
-                            <div key={item.id} className="flex justify-between text-sm py-1">
-                              <span>{item.product.name} x{item.quantity}</span>
+                          {(order.items as OrderItem[]).map((item, idx) => (
+                            <div key={idx} className="flex justify-between text-sm py-1">
+                              <span>{item.name} x{item.quantity}</span>
                               <span>{(item.price * item.quantity).toFixed(2)} CHF</span>
                             </div>
                           ))}
+                          <div className="flex justify-between text-sm py-1 text-gray-500">
+                            <span>Sous-total</span>
+                            <span>{order.subtotal.toFixed(2)} CHF</span>
+                          </div>
+                          <div className="flex justify-between text-sm py-1 text-gray-500">
+                            <span>Livraison</span>
+                            <span>{order.shipping > 0 ? `${order.shipping.toFixed(2)} CHF` : 'Gratuit'}</span>
+                          </div>
                           <div className="flex justify-between font-bold pt-2 border-t mt-2">
                             <span>Total</span>
                             <span>{order.total.toFixed(2)} CHF</span>
@@ -191,11 +238,11 @@ export default function AdminOrdersPage() {
                           onChange={(e) => updateStatus(order.id, e.target.value)}
                           className="px-3 py-1.5 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
                         >
-                          <option value="pending">En attente</option>
-                          <option value="confirmed">Confirmée</option>
-                          <option value="ready">Prête</option>
-                          <option value="delivered">Livrée</option>
-                          <option value="cancelled">Annulée</option>
+                          <option value="PENDING">En attente</option>
+                          <option value="PAID">Payée</option>
+                          <option value="SHIPPED">Expédiée</option>
+                          <option value="DELIVERED">Livrée</option>
+                          <option value="CANCELLED">Annulée</option>
                         </select>
                       </div>
                     </div>

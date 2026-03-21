@@ -1,7 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { getProductById } from '@/lib/products'
 import { sendCustomerEmail, sendAdminEmail } from '@/lib/email'
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const status = searchParams.get('status')
+
+    const where: any = {}
+
+    if (session.user.role === 'ADMIN') {
+      // Admin sees all orders
+      if (status) where.status = status
+    } else {
+      // Customer sees only their orders
+      where.userId = session.user.id
+      if (status) where.status = status
+    }
+
+    const orders = await prisma.order.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { name: true, email: true },
+        },
+      },
+    })
+
+    return NextResponse.json(orders)
+  } catch (error) {
+    console.error('Error fetching orders:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
 
 export async function POST(req: NextRequest) {
   const data = await req.json()
@@ -32,7 +74,41 @@ export async function POST(req: NextRequest) {
     address: data.address,
   }
 
-  // Send emails (await to ensure they are sent before serverless function ends)
+  // Check if user is authenticated to link order
+  let userId: string | null = null
+  try {
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id && session.user.id !== 'admin') {
+      userId = session.user.id
+    }
+  } catch {
+    // Guest order - no user linked
+  }
+
+  // Save order to database
+  try {
+    await prisma.order.create({
+      data: {
+        orderId,
+        userId,
+        customerName: data.name,
+        customerEmail: data.email,
+        customerPhone: data.phone,
+        paymentMethod: data.paymentMethod,
+        address: data.address || null,
+        personalization: data.personalization || null,
+        subtotal: data.subtotal || data.total,
+        shipping: data.shipping || 0,
+        total: data.total,
+        status: 'PENDING',
+        items: emailItems,
+      },
+    })
+  } catch (error) {
+    console.error('Error saving order to database:', error)
+  }
+
+  // Send emails
   try {
     await Promise.all([
       sendCustomerEmail(emailData),

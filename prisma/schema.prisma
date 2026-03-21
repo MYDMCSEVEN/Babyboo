@@ -3,52 +3,51 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String
-  price       Float
-  image       String   @default("/images/placeholder.jpg")
-  images      String   @default("[]")
-  category    String
-  inStock     Boolean  @default(true)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  orderItems  OrderItem[]
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      Role     @default(CUSTOMER)
+  orders    Order[]
+  createdAt DateTime @default(now())
 }
 
 model Order {
-  id            String   @id @default(cuid())
-  customerName  String
-  customerEmail String
-  customerPhone String
-  status        String   @default("pending")
-  total         Float
-  paymentMethod String
-  paymentId     String?
-  items         OrderItem[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  price     Float
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
-}
-
-model Admin {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String
+  id              String      @id @default(cuid())
+  orderId         String      @unique
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  paymentMethod   String
+  address         String?
+  personalization String?
+  subtotal        Float
+  shipping        Float       @default(0)
+  total           Float
+  status          OrderStatus @default(PENDING)
+  items           Json
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }

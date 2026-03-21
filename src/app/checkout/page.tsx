@@ -7,6 +7,8 @@ import { formatPrice } from '@/lib/format'
 
 const SHIPPING_COST = 5.90
 
+const inputClass = "w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+
 export default function CheckoutPage() {
   const router = useRouter()
   const [cart, setCart] = useState<CartItem[]>([])
@@ -16,8 +18,14 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
     paymentMethod: 'twint',
-    address: '',
-    personalization: '',
+    street: '',
+    npa: '',
+    city: '',
+    canton: '',
+    persNames: '',
+    persMaterial: [] as string[],
+    persColors: '',
+    persNote: '',
   })
 
   useEffect(() => {
@@ -31,16 +39,38 @@ export default function CheckoutPage() {
   const shipping = isPickup ? 0 : SHIPPING_COST
   const total = subtotal + shipping
 
+  const toggleMaterial = (mat: string) => {
+    setForm(prev => ({
+      ...prev,
+      persMaterial: prev.persMaterial.includes(mat)
+        ? prev.persMaterial.filter(m => m !== mat)
+        : [...prev.persMaterial, mat],
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
+    const address = isPickup ? '' : `${form.street}, ${form.npa} ${form.city}, ${form.canton}`
+    const personalization = [
+      form.persNames ? `Prénom(s) : ${form.persNames}` : '',
+      form.persMaterial.length > 0 ? `Matériaux : ${form.persMaterial.join(' + ')}` : '',
+      form.persColors ? `Couleur(s) : ${form.persColors}` : '',
+      form.persNote ? `Note : ${form.persNote}` : '',
+    ].filter(Boolean).join('\n')
 
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          paymentMethod: form.paymentMethod,
+          address,
+          personalization,
           items: cart.map((item) => ({
             productId: item.id,
             quantity: item.quantity,
@@ -112,7 +142,7 @@ export default function CheckoutPage() {
             required
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+            className={inputClass}
           />
         </div>
 
@@ -123,7 +153,7 @@ export default function CheckoutPage() {
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+            className={inputClass}
           />
         </div>
 
@@ -134,35 +164,177 @@ export default function CheckoutPage() {
             required
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+            className={inputClass}
           />
         </div>
 
+        {/* Adresse de livraison — champs séparés */}
         {!isPickup && (
-          <div>
-            <label className="block text-sm font-medium text-baby-text mb-1">Adresse de livraison *</label>
-            <textarea
-              required
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              rows={3}
-              className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
-              placeholder="Rue, NPA, Ville"
-            />
+          <div className="space-y-4">
+            <h3 className="font-serif text-lg text-baby-text">Adresse de livraison</h3>
+            <div>
+              <label className="block text-sm font-medium text-baby-text mb-1">Rue et numéro *</label>
+              <input
+                type="text"
+                required
+                value={form.street}
+                onChange={(e) => setForm({ ...form, street: e.target.value })}
+                className={inputClass}
+                placeholder="Ex: Rue de la Blancherie 35"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-baby-text mb-1">NPA *</label>
+                <input
+                  type="text"
+                  required
+                  value={form.npa}
+                  onChange={(e) => setForm({ ...form, npa: e.target.value })}
+                  className={inputClass}
+                  placeholder="1920"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-baby-text mb-1">Ville *</label>
+                <input
+                  type="text"
+                  required
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  className={inputClass}
+                  placeholder="Martigny"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-baby-text mb-1">Canton *</label>
+              <select
+                required
+                value={form.canton}
+                onChange={(e) => setForm({ ...form, canton: e.target.value })}
+                className={inputClass}
+              >
+                <option value="">Sélectionner un canton</option>
+                <option value="AG">Argovie (AG)</option>
+                <option value="AI">Appenzell Rhodes-Intérieures (AI)</option>
+                <option value="AR">Appenzell Rhodes-Extérieures (AR)</option>
+                <option value="BE">Berne (BE)</option>
+                <option value="BL">Bâle-Campagne (BL)</option>
+                <option value="BS">Bâle-Ville (BS)</option>
+                <option value="FR">Fribourg (FR)</option>
+                <option value="GE">Genève (GE)</option>
+                <option value="GL">Glaris (GL)</option>
+                <option value="GR">Grisons (GR)</option>
+                <option value="JU">Jura (JU)</option>
+                <option value="LU">Lucerne (LU)</option>
+                <option value="NE">Neuchâtel (NE)</option>
+                <option value="NW">Nidwald (NW)</option>
+                <option value="OW">Obwald (OW)</option>
+                <option value="SG">Saint-Gall (SG)</option>
+                <option value="SH">Schaffhouse (SH)</option>
+                <option value="SO">Soleure (SO)</option>
+                <option value="SZ">Schwyz (SZ)</option>
+                <option value="TG">Thurgovie (TG)</option>
+                <option value="TI">Tessin (TI)</option>
+                <option value="UR">Uri (UR)</option>
+                <option value="VD">Vaud (VD)</option>
+                <option value="VS">Valais (VS)</option>
+                <option value="ZG">Zoug (ZG)</option>
+                <option value="ZH">Zurich (ZH)</option>
+              </select>
+            </div>
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-baby-text mb-1">Personnalisation (prénom, couleurs...)</label>
-          <textarea
-            value={form.personalization}
-            onChange={(e) => setForm({ ...form, personalization: e.target.value })}
-            rows={2}
-            className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
-            placeholder="Ex: Prénom EMMA, perles roses et blanches"
-          />
+        {/* Personnalisation */}
+        <div className="space-y-4">
+          <h3 className="font-serif text-lg text-baby-text">Personnalisation</h3>
+
+          <div>
+            <label className="block text-sm font-medium text-baby-text mb-1">Prénom(s) à inscrire *</label>
+            <input
+              type="text"
+              required
+              value={form.persNames}
+              onChange={(e) => setForm({ ...form, persNames: e.target.value })}
+              className={inputClass}
+              placeholder="Ex: EMMA, LÉO"
+            />
+            <p className="text-xs text-baby-text/50 mt-1">Séparez les prénoms par une virgule si plusieurs</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-baby-text mb-2">Matériaux souhaités *</label>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
+                <input
+                  type="checkbox"
+                  checked={form.persMaterial.includes('Silicone alimentaire')}
+                  onChange={() => toggleMaterial('Silicone alimentaire')}
+                  className="w-4 h-4 text-baby-rose rounded"
+                />
+                <span className="text-2xl">🫧</span>
+                <div>
+                  <span className="font-medium">Silicone alimentaire</span>
+                  <span className="text-sm text-baby-text/60 ml-2">Sans BPA, non toxique</span>
+                </div>
+              </label>
+              <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
+                <input
+                  type="checkbox"
+                  checked={form.persMaterial.includes('Bois naturel')}
+                  onChange={() => toggleMaterial('Bois naturel')}
+                  className="w-4 h-4 text-baby-rose rounded"
+                />
+                <span className="text-2xl">🪵</span>
+                <div>
+                  <span className="font-medium">Bois naturel</span>
+                  <span className="text-sm text-baby-text/60 ml-2">Non traité, poncé</span>
+                </div>
+              </label>
+              <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
+                <input
+                  type="checkbox"
+                  checked={form.persMaterial.includes('Mélange silicone + bois')}
+                  onChange={() => toggleMaterial('Mélange silicone + bois')}
+                  className="w-4 h-4 text-baby-rose rounded"
+                />
+                <span className="text-2xl">✨</span>
+                <div>
+                  <span className="font-medium">Mélange silicone + bois</span>
+                  <span className="text-sm text-baby-text/60 ml-2">Le meilleur des deux</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-baby-text mb-1">Couleur(s) souhaitée(s) *</label>
+            <input
+              type="text"
+              required
+              value={form.persColors}
+              onChange={(e) => setForm({ ...form, persColors: e.target.value })}
+              className={inputClass}
+              placeholder="Ex: Rose, blanc, bleu ciel"
+            />
+            <p className="text-xs text-baby-text/50 mt-1">Indiquez une ou plusieurs couleurs séparées par des virgules</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-baby-text mb-1">Note particulière (style, demande spéciale...)</label>
+            <textarea
+              value={form.persNote}
+              onChange={(e) => setForm({ ...form, persNote: e.target.value })}
+              rows={2}
+              className={inputClass}
+              placeholder="Ex: Perles roses et blanches, style fleuri..."
+            />
+          </div>
         </div>
 
+        {/* Mode de paiement */}
         <div>
           <label className="block text-sm font-medium text-baby-text mb-3">Mode de paiement *</label>
           <div className="space-y-2">

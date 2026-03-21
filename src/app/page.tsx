@@ -39,14 +39,16 @@ export default async function HomePage() {
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <Image
-            src="/images/logo-saumon.png"
-            alt="Babyboo Créations"
-            width={120}
-            height={120}
-            className="mx-auto mb-6 w-20 h-20 md:w-28 md:h-28"
-          />
-          <h2 className="font-serif text-3xl text-baby-text mb-4">Nos créations populaires</h2>
+          <div className="flex items-center justify-center gap-4 md:gap-6 mb-4">
+            <Image
+              src="/images/logo-saumon.png"
+              alt="Babyboo Créations"
+              width={160}
+              height={160}
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32"
+            />
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-baby-text">Nos créations populaires</h2>
+          </div>
           <p className="text-baby-text/60">Découvrez nos accessoires les plus appréciés</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

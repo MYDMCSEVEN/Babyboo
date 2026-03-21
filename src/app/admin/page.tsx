@@ -3,6 +3,7 @@
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import PasswordInput from '@/components/PasswordInput'
 
 export default function AdminLoginPage() {
   const { data: session, status } = useSession()
@@ -72,12 +73,10 @@ export default function AdminLoginPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-baby-text mb-1">Mot de passe</label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
             />
           </div>
           <button

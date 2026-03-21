@@ -3,6 +3,7 @@
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import PasswordInput from '@/components/PasswordInput'
 
 interface OrderItem {
   name: string
@@ -218,12 +219,10 @@ export default function ComptePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-baby-text mb-1">Mot de passe</label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  className={inputClass}
                 />
               </div>
               <button
@@ -270,23 +269,19 @@ export default function ComptePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-baby-text mb-1">Mot de passe *</label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
-                  className={inputClass}
                   placeholder="6 caractères minimum"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-baby-text mb-1">Confirmer le mot de passe *</label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   value={regConfirm}
                   onChange={(e) => setRegConfirm(e.target.value)}
-                  className={inputClass}
                 />
               </div>
               <button

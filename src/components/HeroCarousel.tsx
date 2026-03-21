@@ -27,8 +27,8 @@ export default function HeroCarousel() {
 
   return (
     <section className="relative w-full overflow-hidden">
-      {/* Images */}
-      <div className="relative w-full aspect-[16/7] md:aspect-[16/6]">
+      {/* Images — taller on mobile for better visibility */}
+      <div className="relative w-full aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7] lg:aspect-[16/6]">
         {slides.map((slide, index) => (
           <div
             key={index}
@@ -48,23 +48,23 @@ export default function HeroCarousel() {
         ))}
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
         {/* Content */}
-        <div className="absolute inset-0 flex items-end pb-12 md:pb-16 justify-center">
-          <div className="text-center px-4 max-w-3xl">
-            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white mb-4 drop-shadow-lg">
+        <div className="absolute inset-0 flex items-end pb-16 sm:pb-14 md:pb-16 justify-center">
+          <div className="text-center px-6 max-w-3xl">
+            <h1 className="font-serif text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-white mb-3 md:mb-4 drop-shadow-lg leading-tight">
               Des créations faites main,{' '}
               <span className="text-baby-pink">avec amour</span>
             </h1>
-            <p className="text-white/90 text-base md:text-lg mb-6 max-w-xl mx-auto drop-shadow">
+            <p className="text-white/90 text-sm sm:text-base md:text-lg mb-5 md:mb-6 max-w-xl mx-auto drop-shadow">
               Accessoires uniques en bois et silicone, personnalisables et fabriqués en Suisse.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/boutique" className="btn-primary text-base md:text-lg">
+              <Link href="/boutique" className="btn-primary text-sm sm:text-base md:text-lg">
                 Découvrir la boutique
               </Link>
-              <Link href="/notre-histoire" className="btn-secondary text-base md:text-lg !bg-white/90 !text-baby-text hover:!bg-white">
+              <Link href="/notre-histoire" className="btn-secondary text-sm sm:text-base md:text-lg !bg-white/90 !text-baby-text hover:!bg-white">
                 Notre histoire
               </Link>
             </div>
@@ -73,13 +73,13 @@ export default function HeroCarousel() {
       </div>
 
       {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              index === current ? 'bg-white w-6' : 'bg-white/50'
+            className={`h-2.5 rounded-full transition-all ${
+              index === current ? 'bg-white w-6' : 'bg-white/50 w-2.5'
             }`}
             aria-label={`Image ${index + 1}`}
           />

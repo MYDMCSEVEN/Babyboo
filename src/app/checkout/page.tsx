@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { getCart, clearCart, CartItem, getCartTotal } from '@/lib/cart'
 import { formatPrice } from '@/lib/format'
 
+const SHIPPING_COST = 5.90
+
 export default function CheckoutPage() {
   const router = useRouter()
   const [cart, setCart] = useState<CartItem[]>([])
@@ -14,6 +16,7 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
     paymentMethod: 'twint',
+    address: '',
     personalization: '',
   })
 
@@ -23,7 +26,10 @@ export default function CheckoutPage() {
     setCart(c)
   }, [router])
 
-  const total = getCartTotal(cart)
+  const subtotal = getCartTotal(cart)
+  const isPickup = form.paymentMethod === 'cash'
+  const shipping = isPickup ? 0 : SHIPPING_COST
+  const total = subtotal + shipping
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,6 +46,8 @@ export default function CheckoutPage() {
             quantity: item.quantity,
             price: item.price,
           })),
+          subtotal,
+          shipping,
           total,
         }),
       })
@@ -48,8 +56,14 @@ export default function CheckoutPage() {
 
       const data = await res.json()
 
-      if ((form.paymentMethod === 'stripe' || form.paymentMethod === 'twint') && data.checkoutUrl) {
+      if (form.paymentMethod === 'stripe' && data.checkoutUrl) {
         window.location.href = data.checkoutUrl
+        return
+      }
+
+      if (form.paymentMethod === 'twint') {
+        clearCart()
+        router.push(`/checkout/twint?order=${data.orderId}`)
         return
       }
 
@@ -74,6 +88,14 @@ export default function CheckoutPage() {
             <span className="font-semibold">{formatPrice(item.price * item.quantity)}</span>
           </div>
         ))}
+        <div className="flex justify-between py-2 border-b text-baby-text/70">
+          <span>Sous-total</span>
+          <span>{formatPrice(subtotal)}</span>
+        </div>
+        <div className="flex justify-between py-2 border-b text-baby-text/70">
+          <span>Livraison</span>
+          <span>{isPickup ? 'Gratuit (retrait)' : formatPrice(shipping)}</span>
+        </div>
         <div className="flex justify-between pt-4 text-xl font-bold">
           <span>Total</span>
           <span className="text-baby-rose">{formatPrice(total)}</span>
@@ -116,12 +138,26 @@ export default function CheckoutPage() {
           />
         </div>
 
+        {!isPickup && (
+          <div>
+            <label className="block text-sm font-medium text-baby-text mb-1">Adresse de livraison *</label>
+            <textarea
+              required
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+              placeholder="Rue, NPA, Ville"
+            />
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-baby-text mb-1">Personnalisation (prénom, couleurs...)</label>
           <textarea
             value={form.personalization}
             onChange={(e) => setForm({ ...form, personalization: e.target.value })}
-            rows={3}
+            rows={2}
             className="w-full px-4 py-3 rounded-lg border border-baby-brown/20 focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
             placeholder="Ex: Prénom EMMA, perles roses et blanches"
           />
@@ -139,7 +175,10 @@ export default function CheckoutPage() {
                 onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                 className="text-baby-rose"
               />
-              <span>Twint</span>
+              <div>
+                <span className="font-medium">Twint</span>
+                <span className="text-sm text-baby-text/60 ml-2">Envoi postal — 5.90 CHF</span>
+              </div>
             </label>
             <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
               <input
@@ -150,7 +189,10 @@ export default function CheckoutPage() {
                 onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                 className="text-baby-rose"
               />
-              <span>Carte bancaire (Visa, Mastercard)</span>
+              <div>
+                <span className="font-medium">Carte bancaire</span>
+                <span className="text-sm text-baby-text/60 ml-2">Visa, Mastercard — Envoi postal — 5.90 CHF</span>
+              </div>
             </label>
             <label className="flex items-center space-x-3 p-3 rounded-lg border border-baby-brown/20 cursor-pointer hover:bg-baby-beige transition">
               <input
@@ -161,21 +203,32 @@ export default function CheckoutPage() {
                 onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                 className="text-baby-rose"
               />
-              <span>Espèces (au retrait)</span>
+              <div>
+                <span className="font-medium">Espèces</span>
+                <span className="text-sm text-baby-text/60 ml-2">Retrait gratuit à Fully (VS)</span>
+              </div>
             </label>
           </div>
         </div>
 
-        <p className="text-sm text-baby-text/50">
-          Retrait en Suisse uniquement. Vous serez contacté(e) pour organiser le retrait.
-        </p>
+        {isPickup && (
+          <div className="bg-baby-beige rounded-lg p-4 text-sm text-baby-text/70">
+            <strong>Retrait à Fully (VS)</strong> — Vous serez contacté(e) pour convenir d&apos;un rendez-vous.
+          </div>
+        )}
+
+        {!isPickup && (
+          <div className="bg-baby-beige rounded-lg p-4 text-sm text-baby-text/70">
+            L&apos;envoi sera effectué dès réception du paiement. Délai de livraison : <strong>7 jours ouvrables</strong>.
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={loading}
           className="btn-primary w-full disabled:opacity-50"
         >
-          {loading ? 'Traitement en cours...' : `Commander - ${formatPrice(total)}`}
+          {loading ? 'Traitement en cours...' : `Commander — ${formatPrice(total)}`}
         </button>
       </form>
     </div>

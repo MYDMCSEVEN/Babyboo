@@ -19,6 +19,9 @@ interface Product {
   featured: boolean
 }
 
+type SortKey = 'name' | 'price' | 'category'
+type SortDir = 'asc' | 'desc'
+
 export default function AdminProductsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -26,6 +29,35 @@ export default function AdminProductsPage() {
   const [editing, setEditing] = useState<Product | null>(null)
   const [creating, setCreating] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [filterCategory, setFilterCategory] = useState('all')
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const sortedProducts = [...products]
+    .filter(p => filterCategory === 'all' || p.category === filterCategory)
+    .sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1
+      switch (sortKey) {
+        case 'name': return dir * a.name.localeCompare(b.name, 'fr')
+        case 'price': return dir * (a.price - b.price)
+        case 'category': return dir * a.category.localeCompare(b.category, 'fr')
+        default: return 0
+      }
+    })
+
+  const sortIcon = (key: SortKey) => {
+    if (sortKey !== key) return ' ↕'
+    return sortDir === 'asc' ? ' ↑' : ' ↓'
+  }
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -320,21 +352,41 @@ export default function AdminProductsPage() {
           </div>
         )}
 
+        {/* Filter */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-4 flex flex-col sm:flex-row gap-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-1">Catégorie</label>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-baby-rose/50"
+            >
+              <option value="all">Toutes</option>
+              {[...new Set(products.map(p => p.category))].map(cat => (
+                <option key={cat} value={cat} className="capitalize">{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end">
+            <p className="text-sm text-gray-400 py-2">{sortedProducts.length} produit{sortedProducts.length > 1 ? 's' : ''}</p>
+          </div>
+        </div>
+
         {/* Products Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Image</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Produit</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Prix</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Catégorie</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500 cursor-pointer hover:text-baby-text select-none" onClick={() => toggleSort('name')}>Produit{sortIcon('name')}</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500 cursor-pointer hover:text-baby-text select-none" onClick={() => toggleSort('price')}>Prix{sortIcon('price')}</th>
+                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500 cursor-pointer hover:text-baby-text select-none" onClick={() => toggleSort('category')}>Catégorie{sortIcon('category')}</th>
                 <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">Statut</th>
                 <th className="text-right px-6 py-3 text-sm font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {products.map((product) => (
+              {sortedProducts.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="relative w-12 h-12 bg-gray-100 rounded-lg overflow-hidden">

@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import { getProducts } from '@/lib/products'
 import ProductCard from '@/components/ProductCard'
+
+export const metadata: Metadata = {
+  title: 'Boutique',
+  description: 'Découvrez nos accessoires faits main pour bébés : attache-lolettes, hochets, porte-clés personnalisés, coffrets cadeaux. Fabriqués en Suisse.',
+}
 
 export const dynamic = 'force-dynamic'
 

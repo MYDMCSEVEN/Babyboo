@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Notre Histoire',
+  description: 'Découvrez l\'histoire de Babyboo Créations : deux soeurs suisses qui créent des accessoires uniques pour bébés, faits main avec amour.',
+}
+
 export default function NotreHistoirePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -25,7 +32,7 @@ export default function NotreHistoirePage() {
           </p>
 
           <p>
-            Aujourd&apos;hui, <strong>Babyboo Création</strong> propose une gamme d&apos;accessoires
+            Aujourd&apos;hui, <strong>Babyboo Créations</strong> propose une gamme d&apos;accessoires
             faits main pour bébés et leurs parents. Chaque pièce est unique, personnalisable
             et fabriquée avec des matériaux soigneusement sélectionnés.
           </p>

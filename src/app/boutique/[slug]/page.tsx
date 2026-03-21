@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { getProductBySlug } from '@/lib/products'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
@@ -5,6 +6,20 @@ import AddToCartButton from './AddToCartButton'
 import { formatPrice } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const product = getProductBySlug(params.slug)
+  if (!product) return { title: 'Produit non trouvé' }
+  return {
+    title: product.name,
+    description: product.description,
+    openGraph: {
+      title: `${product.name} | Babyboo Créations`,
+      description: product.description,
+      images: [{ url: product.image }],
+    },
+  }
+}
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = getProductBySlug(params.slug)

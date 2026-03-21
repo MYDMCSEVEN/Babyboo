@@ -1,3 +1,10 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Mentions légales',
+  description: 'Mentions légales de Babyboo Créations. Informations sur l\'entreprise, les produits, le service client et la protection des données.',
+}
+
 export default function MentionsLegalesPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -6,7 +13,7 @@ export default function MentionsLegalesPage() {
       <div className="bg-white rounded-2xl p-8 shadow-sm space-y-6 text-baby-text/80">
         <section>
           <h2 className="font-serif text-xl text-baby-text mb-3">Entreprise</h2>
-          <p>Babyboo Création</p>
+          <p>Babyboo Créations</p>
           <p>Suisse</p>
           <p>Email : info@babyboo-creations.ch</p>
           <p>Tél : 079 270 41 01</p>

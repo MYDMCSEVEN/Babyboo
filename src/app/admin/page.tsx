@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <span className="text-4xl">🔐</span>
           <h1 className="font-serif text-2xl text-baby-text mt-4">Administration</h1>
-          <p className="text-baby-text/60 mt-2">Babyboo Création</p>
+          <p className="text-baby-text/60 mt-2">Babyboo Créations</p>
         </div>
 
         {error && (

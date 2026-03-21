@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-serif text-lg text-baby-text font-bold mb-4">Babyboo Création</h3>
+            <h3 className="font-serif text-lg text-baby-text font-bold mb-4">Babyboo Créations</h3>
             <p className="text-baby-text/70 text-sm">
               Accessoires faits main pour bébés, créés avec amour en Suisse par deux soeurs.
             </p>
@@ -38,7 +38,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-baby-brown/10 text-center text-sm text-baby-text/50">
-          <p>&copy; {new Date().getFullYear()} Babyboo Création. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} Babyboo Créations. Tous droits réservés.</p>
           <p className="mt-1">Fait main avec amour en Suisse 🇨🇭</p>
         </div>
       </div>

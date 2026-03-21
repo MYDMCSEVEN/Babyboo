@@ -49,7 +49,7 @@ export async function sendCustomerEmail(data: OrderEmailData) {
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#5C4033">
       <div style="text-align:center;padding:30px 0;background:#F8E8E0;border-radius:12px 12px 0 0">
-        <h1 style="margin:0;font-size:24px">Babyboo Création</h1>
+        <h1 style="margin:0;font-size:24px">Babyboo Créations</h1>
         <p style="margin:5px 0 0;color:#C4A882">Merci pour votre commande !</p>
       </div>
       <div style="padding:30px;background:#fff">
@@ -84,15 +84,15 @@ export async function sendCustomerEmail(data: OrderEmailData) {
         </p>
       </div>
       <div style="text-align:center;padding:20px;background:#F5F0EB;border-radius:0 0 12px 12px;font-size:12px;color:#888">
-        <p>Babyboo Création — Fait main avec amour en Suisse 🇨🇭</p>
+        <p>Babyboo Créations — Fait main avec amour en Suisse 🇨🇭</p>
       </div>
     </div>
   `
 
   await transporter.sendMail({
-    from: '"Babyboo Création" <info@babyboo-creations.ch>',
+    from: '"Babyboo Créations" <info@babyboo-creations.ch>',
     to: data.customerEmail,
-    subject: `Confirmation de commande #${data.orderId.slice(-6)} — Babyboo Création`,
+    subject: `Confirmation de commande #${data.orderId.slice(-6)} — Babyboo Créations`,
     html,
   })
 }
@@ -124,7 +124,7 @@ export async function sendAdminEmail(data: OrderEmailData) {
   `
 
   await transporter.sendMail({
-    from: '"Babyboo Création" <info@babyboo-creations.ch>',
+    from: '"Babyboo Créations" <info@babyboo-creations.ch>',
     to: 'info@babyboo-creations.ch',
     subject: `🧸 Nouvelle commande #${data.orderId.slice(-6)} — ${data.customerName}`,
     html,

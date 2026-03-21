@@ -46,6 +46,7 @@ export default function ComptePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [profile, setProfile] = useState<{ name: string; email: string; phone: string; createdAt: string } | null>(null)
 
   // Login form
   const [loginEmail, setLoginEmail] = useState('')
@@ -61,8 +62,21 @@ export default function ComptePage() {
   useEffect(() => {
     if (status === 'authenticated') {
       fetchOrders()
+      fetchProfile()
     }
   }, [status])
+
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch('/api/profile')
+      if (res.ok) {
+        const data = await res.json()
+        setProfile(data)
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+    }
+  }
 
   const fetchOrders = async () => {
     try {
@@ -315,6 +329,37 @@ export default function ComptePage() {
             Déconnexion
           </button>
         </div>
+
+        {/* Profile info */}
+        {profile && (
+          <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
+            <h2 className="font-serif text-xl text-baby-text mb-4">Mes informations</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-baby-text/50 mb-1">Nom</p>
+                <p className="text-baby-text font-medium">{profile.name}</p>
+              </div>
+              <div>
+                <p className="text-baby-text/50 mb-1">Email</p>
+                <p className="text-baby-text font-medium">{profile.email}</p>
+              </div>
+              <div>
+                <p className="text-baby-text/50 mb-1">Téléphone</p>
+                <p className="text-baby-text font-medium">{profile.phone || 'Non renseigné'}</p>
+              </div>
+              <div>
+                <p className="text-baby-text/50 mb-1">Membre depuis</p>
+                <p className="text-baby-text font-medium">
+                  {new Date(profile.createdAt).toLocaleDateString('fr-CH', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Orders */}
         <div>

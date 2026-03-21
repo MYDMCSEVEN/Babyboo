@@ -59,7 +59,10 @@ export default function Footer() {
             <Image src="/images/logo-saumon.png" alt="" width={24} height={24} className="w-6 h-6 opacity-50" />
             <p>&copy; {new Date().getFullYear()} Babyboo Créations. Tous droits réservés.</p>
           </div>
-          <p>Fait main avec amour en Suisse 🇨🇭</p>
+          <div className="flex items-center gap-4">
+            <p>Fait main avec amour en Suisse 🇨🇭</p>
+            <Link href="/admin" className="text-baby-text/30 hover:text-baby-text/50 transition text-xs">Admin</Link>
+          </div>
         </div>
       </div>
     </footer>

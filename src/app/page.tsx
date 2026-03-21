@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getFeaturedProducts } from '@/lib/products'
 import ProductCard from '@/components/ProductCard'
+import HeroCarousel from '@/components/HeroCarousel'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,27 +10,8 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-baby-pink to-baby-cream py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-6xl text-baby-text mb-6">
-            Des créations faites main,<br />
-            <span className="text-baby-rose">avec amour</span>
-          </h1>
-          <p className="text-lg md:text-xl text-baby-text/70 mb-8 max-w-2xl mx-auto">
-            Deux soeurs, M & M, créent des accessoires uniques pour bébés en bois et silicone.
-            Chaque pièce est personnalisable et fabriquée en Suisse.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/boutique" className="btn-primary text-lg">
-              Découvrir la boutique
-            </Link>
-            <Link href="/notre-histoire" className="btn-secondary text-lg">
-              Notre histoire
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero Carousel */}
+      <HeroCarousel />
 
       {/* Trust badges */}
       <section className="bg-white py-8 border-b">

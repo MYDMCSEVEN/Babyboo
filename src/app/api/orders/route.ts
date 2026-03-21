@@ -32,11 +32,15 @@ export async function POST(req: NextRequest) {
     address: data.address,
   }
 
-  // Send emails (don't block the response)
-  Promise.all([
-    sendCustomerEmail(emailData).catch(console.error),
-    sendAdminEmail(emailData).catch(console.error),
-  ])
+  // Send emails (await to ensure they are sent before serverless function ends)
+  try {
+    await Promise.all([
+      sendCustomerEmail(emailData),
+      sendAdminEmail(emailData),
+    ])
+  } catch (error) {
+    console.error('Email error:', error)
+  }
 
   // Stripe card payment
   if (data.paymentMethod === 'stripe') {

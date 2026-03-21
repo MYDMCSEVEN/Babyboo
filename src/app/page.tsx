@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getFeaturedProducts } from '@/lib/products'
 import ProductCard from '@/components/ProductCard'
 import HeroCarousel from '@/components/HeroCarousel'
@@ -38,6 +39,13 @@ export default async function HomePage() {
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
+          <Image
+            src="/images/logo-saumon.png"
+            alt="Babyboo Créations"
+            width={120}
+            height={120}
+            className="mx-auto mb-6 w-20 h-20 md:w-28 md:h-28"
+          />
           <h2 className="font-serif text-3xl text-baby-text mb-4">Nos créations populaires</h2>
           <p className="text-baby-text/60">Découvrez nos accessoires les plus appréciés</p>
         </div>

@@ -1,9 +1,11 @@
 import nodemailer from 'nodemailer'
 
+const smtpPort = parseInt(process.env.SMTP_PORT || '465')
+
 const transporter = nodemailer.createTransport({
-  host: 'mail.infomaniak.com',
-  port: 587,
-  secure: false,
+  host: process.env.SMTP_HOST || 'mail.infomaniak.com',
+  port: smtpPort,
+  secure: smtpPort === 465,
   auth: {
     user: process.env.SMTP_USER || 'info@babyboo-creations.ch',
     pass: process.env.SMTP_PASSWORD || '',

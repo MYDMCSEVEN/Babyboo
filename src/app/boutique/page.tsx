@@ -1,8 +1,20 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { getProducts } from '@/lib/products'
+import { useState, useMemo, useEffect } from 'react'
 import ProductCard from '@/components/ProductCard'
+
+interface Product {
+  id: string
+  name: string
+  slug: string
+  description: string
+  price: number
+  image: string
+  categories: string
+  inStock: boolean
+  featured: boolean
+  isNew: boolean
+}
 
 type SortKey = 'name' | 'price-asc' | 'price-desc' | 'category'
 
@@ -14,16 +26,33 @@ const sortLabels: Record<SortKey, string> = {
 }
 
 export default function BoutiquePage() {
-  const allProducts = getProducts()
-  const categories = [...new Set(allProducts.map((p) => p.category))]
-
+  const [allProducts, setAllProducts] = useState<Product[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [sortBy, setSortBy] = useState<SortKey>('name')
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => setAllProducts(data.filter((p: Product) => p.inStock)))
+  }, [])
+
+  // Extract unique categories from all products
+  const categories = useMemo(() => {
+    const cats = new Set<string>()
+    allProducts.forEach((p) => {
+      const parsed: string[] = JSON.parse(p.categories)
+      parsed.forEach((c) => cats.add(c))
+    })
+    return [...cats].sort()
+  }, [allProducts])
 
   const filteredAndSorted = useMemo(() => {
     let products = selectedCategory === 'all'
       ? allProducts
-      : allProducts.filter((p) => p.category === selectedCategory)
+      : allProducts.filter((p) => {
+          const cats: string[] = JSON.parse(p.categories)
+          return cats.includes(selectedCategory)
+        })
 
     switch (sortBy) {
       case 'name':
@@ -33,17 +62,21 @@ export default function BoutiquePage() {
       case 'price-desc':
         return [...products].sort((a, b) => b.price - a.price)
       case 'category':
-        return [...products].sort((a, b) => a.category.localeCompare(b.category, 'fr'))
+        return [...products].sort((a, b) => {
+          const catA = JSON.parse(a.categories)[0] || ''
+          const catB = JSON.parse(b.categories)[0] || ''
+          return catA.localeCompare(catB, 'fr')
+        })
       default:
         return products
     }
   }, [allProducts, selectedCategory, sortBy])
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="text-center mb-8">
-        <h1 className="font-serif text-4xl text-baby-text mb-4">Notre Boutique</h1>
-        <p className="text-baby-text/60 max-w-2xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-baby-text mb-2 sm:mb-4">Notre Boutique</h1>
+        <p className="text-baby-text/60 max-w-2xl mx-auto text-sm sm:text-base">
           Tous nos produits sont faits main en Suisse, personnalisables et créés avec des matériaux sûrs pour bébé.
         </p>
       </div>
@@ -82,17 +115,21 @@ export default function BoutiquePage() {
 
       {/* Products grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredAndSorted.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            slug={product.slug}
-            price={product.price}
-            image={product.image}
-            category={product.category}
-          />
-        ))}
+        {filteredAndSorted.map((product) => {
+          const cats: string[] = JSON.parse(product.categories)
+          return (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              slug={product.slug}
+              price={product.price}
+              image={product.image}
+              category={cats[0] || ''}
+              isNew={product.isNew}
+            />
+          )
+        })}
       </div>
 
       {filteredAndSorted.length === 0 && (

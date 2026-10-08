@@ -3,11 +3,19 @@
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 function TwintContent() {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('order') || ''
+  // Montant calculé par le serveur lors de la commande (08.10.2026)
+  const [montant, setMontant] = useState<number | null>(null)
+  useEffect(() => {
+    try {
+      const d = JSON.parse(sessionStorage.getItem('babyboo_derniere_commande') || 'null')
+      if (d && d.orderId === orderId && typeof d.total === 'number') setMontant(d.total)
+    } catch {}
+  }, [orderId])
 
   return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
@@ -17,8 +25,13 @@ function TwintContent() {
         <p className="text-baby-text/60 mb-8">Commande #{orderId.slice(-6)}</p>
 
         <div className="bg-baby-beige rounded-xl p-6 mb-6">
+          {montant !== null && (
+            <p className="text-sm text-baby-text/70 mb-3">
+              Montant à payer : <strong className="text-lg text-baby-text">{montant.toFixed(2)} CHF</strong>
+            </p>
+          )}
           <p className="text-sm text-baby-text/70 mb-3">Envoyez le montant via Twint au :</p>
-          <p className="text-2xl font-bold text-baby-text mb-2">079 270 41 01</p>
+          <p className="text-2xl font-bold text-baby-text mb-2">079 270 41 05</p>
           <p className="text-sm text-baby-text/70">
             Indiquez la référence <strong>#{orderId.slice(-6)}</strong> dans le message Twint.
           </p>
@@ -31,7 +44,7 @@ function TwintContent() {
           </div>
           <div className="flex items-start space-x-2">
             <span>2.</span>
-            <span>Envoyez le montant au <strong>079 270 41 01</strong></span>
+            <span>Envoyez le montant au <strong>079 270 41 05</strong></span>
           </div>
           <div className="flex items-start space-x-2">
             <span>3.</span>

@@ -8,3 +8,17 @@ public/uploads/*
 .vercel
 .env*.local
 tsconfig.tsbuildinfo
+backups/
+tests-securite/
+*.dump
+FUITE-*.md
+*.csv
+*.zip
+*.tar
+*.bak
+*.sqlite*
+*.log
+*.p12
+
+# Notes internes MYDMC (dépôt public)
+REPRISE.md

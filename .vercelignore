@@ -1,0 +1,35 @@
+# Fichiers qui ne doivent JAMAIS partir chez Vercel (08.10.2026)
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Sauvegardes, journaux d'incident, outils de test
+backups/
+tests-securite/
+FUITE-*.md
+*.tar.gz
+*.dump
+*.sql.gz
+# Bases locales
+*.db
+*.db-journal
+prisma/dev.db
+# Outils et dossiers locaux
+.claude/
+.git/
+.vercel/
+.next/
+node_modules/
+tsconfig.tsbuildinfo
+.DS_Store
+# Exports et archives éventuels
+*.sql
+*.csv
+*.zip
+*.tar
+*.bak
+*.sqlite*
+*.log
+*.p12

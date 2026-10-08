@@ -26,7 +26,6 @@ export async function GET(
       return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
-    // Customers can only see their own orders
     if (session.user.role !== 'ADMIN' && order.userId !== session.user.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
@@ -38,6 +37,9 @@ export async function GET(
   }
 }
 
+const validPaymentStatuses = ['UNPAID', 'PAID', 'REFUNDED']
+const validShippingStatuses = ['PROCESSING', 'SHIPPED', 'DELIVERED']
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -48,16 +50,79 @@ export async function PATCH(
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     }
 
-    const { status } = await req.json()
+    const body = await req.json()
+    const data: any = {}
+    const now = new Date()
 
-    const validStatuses = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED']
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: 'Statut invalide' }, { status: 400 })
+    // Get current order to build history
+    const currentOrder = await prisma.order.findUnique({
+      where: { id: params.id },
+    })
+
+    if (!currentOrder) {
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
+    }
+
+    const history: any[] = Array.isArray(currentOrder.statusHistory)
+      ? [...(currentOrder.statusHistory as any[])]
+      : []
+
+    if (body.paymentStatus && validPaymentStatuses.includes(body.paymentStatus)) {
+      if (body.paymentStatus !== currentOrder.paymentStatus) {
+        history.push({
+          type: 'payment',
+          from: currentOrder.paymentStatus,
+          to: body.paymentStatus,
+          at: now.toISOString(),
+        })
+        data.paymentStatus = body.paymentStatus
+        data.paymentStatusAt = now
+      }
+    }
+
+    if (body.shippingStatus && validShippingStatuses.includes(body.shippingStatus)) {
+      if (body.shippingStatus !== currentOrder.shippingStatus) {
+        history.push({
+          type: 'shipping',
+          from: currentOrder.shippingStatus,
+          to: body.shippingStatus,
+          at: now.toISOString(),
+        })
+        data.shippingStatus = body.shippingStatus
+        data.shippingStatusAt = now
+      }
+    }
+
+    if (history.length > (currentOrder.statusHistory as any[] || []).length) {
+      data.statusHistory = history
+    }
+
+    // SAV fields
+    if (body.savType !== undefined) {
+      data.savType = body.savType || null
+      data.savAt = body.savType ? now : null
+      // Record in history
+      if (body.savType) {
+        history.push({
+          type: 'sav',
+          from: currentOrder.savType || 'aucun',
+          to: body.savType,
+          at: now.toISOString(),
+        })
+        data.statusHistory = history
+      }
+    }
+    if (body.savReason !== undefined) data.savReason = body.savReason || null
+    if (body.savNote !== undefined) data.savNote = body.savNote || null
+    if (body.savLoss !== undefined) data.savLoss = body.savLoss !== null ? parseFloat(body.savLoss) : null
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json(currentOrder)
     }
 
     const order = await prisma.order.update({
       where: { id: params.id },
-      data: { status },
+      data,
     })
 
     return NextResponse.json(order)
@@ -67,32 +132,9 @@ export async function PATCH(
   }
 }
 
-// Keep backward compatibility with existing admin page that uses PUT
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
-    }
-
-    const { status } = await req.json()
-
-    const validStatuses = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED']
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: 'Statut invalide' }, { status: 400 })
-    }
-
-    const order = await prisma.order.update({
-      where: { id: params.id },
-      data: { status },
-    })
-
-    return NextResponse.json(order)
-  } catch (error) {
-    console.error('Error updating order:', error)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
-  }
+  return PATCH(req, context)
 }

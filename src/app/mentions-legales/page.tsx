@@ -7,16 +7,16 @@ export const metadata: Metadata = {
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="font-serif text-4xl text-baby-text mb-8">Mentions légales</h1>
+    <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+      <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-baby-text mb-6 sm:mb-8">Mentions légales</h1>
 
-      <div className="bg-white rounded-2xl p-8 shadow-sm space-y-6 text-baby-text/80">
+      <div className="bg-white rounded-2xl p-5 sm:p-8 shadow-sm space-y-5 sm:space-y-6 text-baby-text/80 text-sm sm:text-base">
         <section>
           <h2 className="font-serif text-xl text-baby-text mb-3">Entreprise</h2>
           <p>Babyboo Créations</p>
           <p>Suisse</p>
           <p>Email : info@babyboo-creations.ch</p>
-          <p>Tél : 079 270 41 01</p>
+          <p>Tél : 079 270 41 05</p>
         </section>
 
         <section>

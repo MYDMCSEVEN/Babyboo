@@ -6,12 +6,12 @@ import Link from 'next/link'
 
 const slides = [
   {
-    src: '/images/hero-1.jpg',
-    alt: 'Bébé avec attache-lolette personnalisée Babyboo Créations',
+    src: '/images/hero-6.jpg',
+    alt: 'Bébé avec attache-lolette personnalisée LEO — Babyboo Créations',
   },
   {
-    src: '/images/hero-2.jpg',
-    alt: 'Bébé souriant avec accessoire en bois et silicone Babyboo Créations',
+    src: '/images/hero-8.jpg',
+    alt: 'Bébé souriant avec chaîne de perles personnalisée LEO — Babyboo Créations',
   },
 ]
 
@@ -64,8 +64,8 @@ export default function HeroCarousel() {
               <Link href="/boutique" className="btn-primary text-sm sm:text-base md:text-lg">
                 Découvrir la boutique
               </Link>
-              <Link href="/notre-histoire" className="btn-secondary text-sm sm:text-base md:text-lg !bg-white/90 !text-baby-text hover:!bg-white">
-                Notre histoire
+              <Link href="/personnaliser" className="btn-secondary text-sm sm:text-base md:text-lg !bg-white/90 !text-baby-text hover:!bg-white">
+                Personnaliser ✨
               </Link>
             </div>
           </div>

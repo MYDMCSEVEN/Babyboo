@@ -13,12 +13,16 @@ enum Role {
   ADMIN
 }
 
-enum OrderStatus {
-  PENDING
+enum PaymentStatus {
+  UNPAID
   PAID
+  REFUNDED
+}
+
+enum ShippingStatus {
+  PROCESSING
   SHIPPED
   DELIVERED
-  CANCELLED
 }
 
 model User {
@@ -27,27 +31,65 @@ model User {
   password  String
   name      String
   phone     String?
+  address   String?  // saved delivery address
   role      Role     @default(CUSTOMER)
   orders    Order[]
   createdAt DateTime @default(now())
 }
 
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  price       Float
+  image       String
+  images      String   @default("[]")
+  categories  String   @default("[]")
+  inStock     Boolean  @default(true)
+  featured    Boolean  @default(false)
+  isNew       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Order {
-  id              String      @id @default(cuid())
-  orderId         String      @unique
-  userId          String?
-  user            User?       @relation(fields: [userId], references: [id])
-  customerName    String
-  customerEmail   String
-  customerPhone   String
-  paymentMethod   String
-  address         String?
-  personalization String?
-  subtotal        Float
-  shipping        Float       @default(0)
-  total           Float
-  status          OrderStatus @default(PENDING)
-  items           Json
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String         @id @default(cuid())
+  orderId          String         @unique
+  userId           String?
+  user             User?          @relation(fields: [userId], references: [id])
+  customerName     String
+  customerEmail    String
+  customerPhone    String
+  paymentMethod    String
+  address          String?
+  personalization  String?
+  subtotal         Float
+  shipping         Float          @default(0)
+  total            Float
+  paymentStatus    PaymentStatus  @default(UNPAID)
+  shippingStatus   ShippingStatus @default(PROCESSING)
+  paymentStatusAt  DateTime?
+  shippingStatusAt DateTime?
+  statusHistory    Json           @default("[]")
+  items            Json
+  savType          String?        // "refund" | "resend" | null
+  savReason        String?        // reason for SAV
+  savNote          String?        // admin notes
+  savAt            DateTime?      // when SAV was opened
+  savLoss          Float?         // CHF loss amount
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+// Limite d'essais (08.10.2026) : compteurs anti-abus pour l'inscription,
+// le mot de passe oublié et les commandes. La clé est une empreinte
+// (SHA-256) de l'IP ou de l'adresse e-mail : rien n'est stocké en clair.
+// Les lignes de plus de 24 h sont supprimées automatiquement.
+model LimiteEssai {
+  cle      String   @id
+  compteur Int      @default(0)
+  debut    DateTime @default(now())
+
+  @@index([debut])
 }
